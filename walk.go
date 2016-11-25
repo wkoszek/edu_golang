@@ -62,6 +62,7 @@ func main() {
 	flag.Parse()
 
 	if (len(flag.Args()) != 1) {
+		flag.Usage()
 		log.Fatal("bleh")
 	}
 
