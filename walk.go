@@ -1,76 +1,47 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "flag"
-    "encoding/gob"
-    "log"
-    "io"
-    "path/filepath"
     "crypto/md5"
+    "encoding/gob"
+    "path/filepath"
+    "flag"
+    "fmt"
+    "io"
+    "log"
+    "os"
 )
 
 type MetaFile struct {
 	Path	string
-//	Stat	os.FileInfo
 	Size	int64
 	Hash	[]byte
 }
 type MetaFileList map[string]MetaFile
 
 type Mode int
-
 const (
 	ModeInit  Mode = iota
 	ModeDedup      = iota
 )
 
-func processFile(fileName string) (*MetaFile, error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return nil, nil
-	}
-	stat, err := file.Stat()
-	if err != nil {
-		return nil, nil
-	}
-	defer file.Close()
-
-	hash := md5.New()
-	io.Copy(hash, file)
-
-	file.Close()
-
-	return &MetaFile{
-		Path: fileName,
-//		Stat: stat,
-		Size: stat.Size(),
-		Hash: hash.Sum(nil),
-	}, nil
-}
-
 var (
-	flagVerbose = flag.Bool("verbose", false, "verbose logging")
-	flagCount = flag.Int("count", 1000, "count mask (verbose logging every N items")
+	flagHashSize = flag.Int64("hashsize", 1024*1024, "count mask (verbose logging every N items")
+	flagVerbose  = flag.Bool("verbose", false, "verbose logging")
+	flagCount    = flag.Int("count", 1000, "count mask (verbose logging every N items")
+	flagSilos    = flag.String("silos", ".silos", "silos path for md5 sums")
+	flagInit     = flag.Bool("init", false, "init silos")
+	flagDedup    = flag.Bool("dedup", false, "dedup stuff to silos")
 )
 
 func main() {
-	var flagSilos = flag.String("silos", ".silos", "silos path for md5 sums")
-	var flagInit = flag.Bool("init", false, "init silos")
-	var flagDedup = flag.Bool("dedup", false, "dedup stuff to silos")
-
 	flag.Parse()
 
 	if (len(flag.Args()) != 1) {
 		flag.Usage()
 		log.Fatal("bleh")
 	}
-
-	var searchDir = flag.Args()[0]
-	silosFile := *flagSilos // + "/silos.go"
-
-	fmt.Println("==>", searchDir, silosFile, *flagVerbose, *flagCount)
+	searchDir := flag.Args()[0]
+	fmt.Println("==>", searchDir, *flagSilos, *flagVerbose, *flagCount)
 
 	if (*flagInit == false && *flagDedup == false) {
 		flag.Usage()
@@ -93,9 +64,9 @@ func main() {
 	}
 
 	if (*flagInit) {
-		silosOp(silosFile, rawPathList, ModeInit)
+		silosOp(*flagSilos, rawPathList, ModeInit)
 	} else if (*flagDedup) {
-		silosOp(silosFile, rawPathList, ModeDedup)
+		silosOp(*flagSilos, rawPathList, ModeDedup)
 	}
 }
 
@@ -103,6 +74,7 @@ func silosOp(silosFile string, pathList []string, whichMode Mode) {
 	var metaFileList = make(MetaFileList)
 	if (whichMode == ModeDedup) {
 		metaFileList = silosRead(silosFile)
+		fmt.Println("# will dedup now")
 	}
 
 	for path_i, path := range(pathList) {
@@ -119,9 +91,14 @@ func silosFileIterator(path string, ma *MetaFileList) error {
 	var metaFile, _ = processFile(path)
 	var key = fmt.Sprintf("%x", metaFile.Hash)
 
-	_, key_exists := (*ma)[key]
+	maybeDupFile, key_exists := (*ma)[key]
+	if (key_exists && (maybeDupFile.Path == path)) {
+		return nil
+	}
+
 	if (key_exists) {
-		fmt.Println(path, "EXISTS")
+		fmt.Printf("EXISTS: %s!\n", path)
+		fmt.Printf("      : %s\n", maybeDupFile.Path)
 	} else {
 		(*ma)[key] = *metaFile
 		if (*flagVerbose) {
@@ -131,16 +108,46 @@ func silosFileIterator(path string, ma *MetaFileList) error {
 	return nil
 }
 
+func processFile(fileName string) (*MetaFile, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, nil
+	}
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, nil
+	}
+	defer file.Close()
+
+	md5hash := md5.New()
+	lenToHash := stat.Size()
+	if (lenToHash > *flagHashSize) {
+		lenToHash = *flagHashSize
+	}
+	io.CopyN(md5hash, file, lenToHash)
+
+	file.Close()
+
+	return &MetaFile{
+		Path: fileName,
+		Size: stat.Size(),
+		Hash: md5hash.Sum(nil),
+	}, nil
+}
+
 func silosWrite(silosFile string, metaFileList MetaFileList) {
+	fmt.Println("writing")
 	encodeFile, err := os.Create(silosFile)
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Println("writing")
 	encoder := gob.NewEncoder(encodeFile)
 	if err := encoder.Encode(metaFileList); err != nil {
 		panic(err)
 	}
+	fmt.Println("writing")
 	encodeFile.Close()
 }
 
