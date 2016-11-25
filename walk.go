@@ -52,6 +52,7 @@ func processFile(fileName string) (*MetaFile, error) {
 
 var (
 	flagVerbose = flag.Bool("verbose", false, "verbose logging")
+	flagCount = flag.Int("count", 1000, "count mask (verbose logging every N items")
 )
 
 func main() {
@@ -69,25 +70,55 @@ func main() {
 	var searchDir = flag.Args()[0]
 	silosFile := *flagSilos // + "/silos.go"
 
-	fmt.Println("==>", searchDir, silosFile, *flagVerbose)
+	fmt.Println("==>", searchDir, silosFile, *flagVerbose, *flagCount)
 
 	if (*flagInit == false && *flagDedup == false) {
 		flag.Usage()
 	}
 
+	fmt.Println("# indexing....")
+	rawPathList := []string{}
+	err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+		if (f.IsDir()) {
+			return nil
+		}
+		rawPathList = append(rawPathList, path)
+		if (len(rawPathList) % *flagCount == 0) {
+			fmt.Printf("# %d files indexed..\n", len(rawPathList))
+		}
+		return nil
+	})
+	if (err != nil) {
+		log.Fatal(err)
+	}
+
 	if (*flagInit) {
-		silosOp(silosFile, searchDir, ModeInit)
+		silosOp(silosFile, rawPathList, ModeInit)
 	} else if (*flagDedup) {
-		silosOp(silosFile, searchDir, ModeDedup)
+		silosOp(silosFile, rawPathList, ModeDedup)
 	}
 }
 
-func silosFileIterator(path string, f os.FileInfo, err error, ma *MetaFileList, whichMode Mode) error {
-	if (f.IsDir()) {
-		return nil
+func silosOp(silosFile string, pathList []string, whichMode Mode) {
+	var metaFileList = make(MetaFileList)
+	if (whichMode == ModeDedup) {
+		metaFileList = silosRead(silosFile)
 	}
+
+	for path_i, path := range(pathList) {
+		silosFileIterator(path, &metaFileList)
+		if ((path_i % *flagCount) == 0) {
+			fmt.Printf("# %d/%d hashing done %s\n", path_i, len(pathList), path)
+		}
+	}
+
+	silosWrite(silosFile, metaFileList)
+}
+
+func silosFileIterator(path string, ma *MetaFileList) error {
 	var metaFile, _ = processFile(path)
 	var key = fmt.Sprintf("%x", metaFile.Hash)
+
 	_, key_exists := (*ma)[key]
 	if (key_exists) {
 		fmt.Println(path, "EXISTS")
@@ -98,20 +129,6 @@ func silosFileIterator(path string, f os.FileInfo, err error, ma *MetaFileList, 
 		}
 	}
 	return nil
-}
-
-func silosOp(silosFile string, searchPath string, whichMode Mode) {
-	var metaFileList = make(MetaFileList)
-	if (whichMode == ModeDedup) {
-		metaFileList = silosRead(silosFile)
-	}
-	err := filepath.Walk(searchPath, func(path string, f os.FileInfo, err error) error {
-		return silosFileIterator(path, f, err, &metaFileList, whichMode)
-	})
-	if (err != nil) {
-		log.Fatal(err)
-	}
-	silosWrite(silosFile, metaFileList)
 }
 
 func silosWrite(silosFile string, metaFileList MetaFileList) {
