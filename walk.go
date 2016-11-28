@@ -1,20 +1,22 @@
 package main
 
 import (
-    "crypto/md5"
-    "encoding/gob"
-    "path/filepath"
-    "flag"
-    "fmt"
-    "io"
-    "log"
-    "os"
+	"github.com/carlogit/phash"
+	"crypto/md5"
+	"encoding/gob"
+	"path/filepath"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"os"
 )
 
 type MetaFile struct {
 	Path	string
 	Size	int64
 	Hash	[]byte
+	HashImg	string
 }
 type MetaFileList map[string]MetaFile
 
@@ -31,6 +33,10 @@ var (
 	flagSilos    = flag.String("silos", ".silos", "silos path for md5 sums")
 	flagInit     = flag.Bool("init", false, "init silos")
 	flagDedup    = flag.Bool("dedup", false, "dedup stuff to silos")
+	flagFirst    = flag.Bool("1", false, "if duplicate, operate 1st file")
+	flagSecond   = flag.Bool("2", false, "if duplicate, operate 2nd file")
+	flagRemove   = flag.Bool("remove", false, "remove file")
+	flagImg      = flag.Bool("img", false, "operate on image")
 )
 
 func main() {
@@ -41,6 +47,9 @@ func main() {
 		log.Fatal("bleh")
 	}
 	searchDir := flag.Args()[0]
+	if (*flagImg) {
+		*flagSilos += ".img"
+	}
 	fmt.Println("==>", searchDir, *flagSilos, *flagVerbose, *flagCount)
 
 	if (*flagInit == false && *flagDedup == false) {
@@ -90,6 +99,9 @@ func silosOp(silosFile string, pathList []string, whichMode Mode) {
 func silosFileIterator(path string, ma *MetaFileList) error {
 	var metaFile, _ = processFile(path)
 	var key = fmt.Sprintf("%x", metaFile.Hash)
+	if (metaFile.HashImg != "") {
+		key = metaFile.HashImg
+	}
 
 	maybeDupFile, key_exists := (*ma)[key]
 	if (key_exists && (maybeDupFile.Path == path)) {
@@ -99,6 +111,7 @@ func silosFileIterator(path string, ma *MetaFileList) error {
 	if (key_exists) {
 		fmt.Printf("EXISTS: %s!\n", path)
 		fmt.Printf("      : %s\n", maybeDupFile.Path)
+		handleDuplicate(path, maybeDupFile.Path)
 	} else {
 		(*ma)[key] = *metaFile
 		if (*flagVerbose) {
@@ -106,6 +119,16 @@ func silosFileIterator(path string, ma *MetaFileList) error {
 		}
 	}
 	return nil
+}
+
+func handleDuplicate(path1 string, path2 string) {
+	path := path1
+	if (*flagSecond) {
+		path = path2
+	}
+	if (*flagRemove) {
+		fmt.Printf("rm %s\n", path)
+	}
 }
 
 func processFile(fileName string) (*MetaFile, error) {
@@ -126,12 +149,25 @@ func processFile(fileName string) (*MetaFile, error) {
 	}
 	io.CopyN(md5hash, file, lenToHash)
 
+	var fileNameExt = fileName[len(fileName) - 3:]
+
+	var hashImg = ""
+	if (fileNameExt == "jpg" || fileNameExt == "JPG") {
+		file.Seek(0, os.SEEK_SET)
+		hashImg, err = phash.GetHash(file)
+		if (err != nil) {
+			fmt.Println(fileName, " is messed up. will skip")
+			hashImg = ""
+		}
+	}
+
 	file.Close()
 
 	return &MetaFile{
 		Path: fileName,
 		Size: stat.Size(),
 		Hash: md5hash.Sum(nil),
+		HashImg: hashImg,
 	}, nil
 }
 
