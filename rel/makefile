@@ -21,3 +21,4 @@ all:
 #
 clean:
 	rm -rf *.prog
+	rm -rf *.linux.* *.freebsd.* *.darwin.*
