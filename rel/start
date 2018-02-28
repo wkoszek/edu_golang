@@ -1,0 +1,1 @@
+docker run -v `pwd`:/v -ti --entrypoint /bin/bash golang_rel
