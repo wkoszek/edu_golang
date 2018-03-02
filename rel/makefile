@@ -22,3 +22,4 @@ all:
 clean:
 	rm -rf *.prog
 	rm -rf *.linux.* *.freebsd.* *.darwin.*
+	rm -rf hello hello-2.10 hello-2.10.tar.gz hello.prog hello_2.10.orig.tar.gz
