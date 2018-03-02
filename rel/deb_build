@@ -1,11 +1,21 @@
 set -x
 
 rm -rf hello
+rm -rf hello_2.10.orig.tar.gz
+
 export USER=root
 bzr whoami "Your Name <name@example.com>"
 
+make clean
+make all
+mkdir hello-2.10
+mv *.amd64 hello-2.10/
+mv *.386 hello-2.10/
+
+tar czf hello-2.10.tar.gz hello-2.10
+
 expect -c "spawn bzr dh-make hello 2.10 hello-2.10.tar.gz; expect -re \"Type of package:\"; send \"Y\";"
 
-bzr add debian/source/format
-bzr commit -m "Initial commit of Debian packaging."
+#bzr add debian/source/format
+#bzr commit -m "Initial commit of Debian packaging."
 bzr builddeb -- -us -uc
