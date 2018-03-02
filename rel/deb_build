@@ -1,7 +1,9 @@
+set -x
+
 rm -rf hello
 export USER=root
 bzr whoami "Your Name <name@example.com>"
-bzr dh-make --single hello 2.10 hello-2.10.tar.gz
+bzr dh-make hello 2.10 hello-2.10.tar.gz
 bzr add debian/source/format
 bzr commit -m "Initial commit of Debian packaging."
 bzr builddeb -- -us -uc
