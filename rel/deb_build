@@ -1,8 +1,5 @@
 set -x
 
-rm -rf hello
-rm -rf hello_2.10.orig.tar.gz
-
 export USER=root
 bzr whoami "Your Name <name@example.com>"
 
