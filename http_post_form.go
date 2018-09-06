@@ -3,14 +3,17 @@ package main;
 import (
 	"net/http"
 	"net/http/httputil"
-	"strings"
+	"net/url"
 	"fmt"
 	"log"
 )
 
 func main() {
-	postBody := strings.NewReader("some body")
-	resp, err := http.Post("http://localhost:7125/", "text/plain", postBody)
+	formData := url.Values{}
+	formData.Set("value1", "samplevalue1")
+	formData.Set("x", "1024")
+	formData.Set("y", "768")
+	resp, err := http.PostForm("http://localhost:7125/", formData)
 	if err != nil {
 		log.Fatal(err)
 	}
