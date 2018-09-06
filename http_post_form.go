@@ -10,7 +10,7 @@ import (
 
 func main() {
 	postBody := strings.NewReader("some body")
-	resp, err := http.Post("http://localhost/", "text/plain", postBody)
+	resp, err := http.Post("http://localhost:7125/", "text/plain", postBody)
 	if err != nil {
 		log.Fatal(err)
 	}

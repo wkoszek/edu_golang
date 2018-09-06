@@ -3,14 +3,12 @@ package main;
 import (
 	"net/http"
 	"net/http/httputil"
-	"strings"
 	"fmt"
 	"log"
 )
 
 func main() {
-	postBody := strings.NewReader("some body")
-	resp, err := http.Post("http://localhost/", "text/plain", postBody)
+	resp, err := http.Get("http://localhost/")
 	if err != nil {
 		log.Fatal(err)
 	}
