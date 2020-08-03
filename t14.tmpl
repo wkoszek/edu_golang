@@ -1,0 +1,36 @@
+<html>
+<body>
+	<table border="0">
+	<tbody>
+
+	{{/*
+		comment
+	*/}}
+
+	{{ range $idx, $element := . }}
+		<tr>
+			{{/*
+				{{ if 1 }}
+					el:{{ $element }}
+					idx:{{ $idx }}
+				{{ end }}
+			*/}}
+			{{ if rowColored $idx }}
+				<td bgcolor="lightyellow">{{ . }}</td>
+			{{ else }}
+				<td bgcolor="lightgray">{{ . }}</td>
+			{{ end }}
+	
+			{{ if (rowColored $idx) }}
+				true
+			{{ else }}
+				false
+			{{ end }}
+		</tr>
+	{{ end }}
+
+
+	</tbody>
+	</table>
+</body>
+</html>
