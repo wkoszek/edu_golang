@@ -6,6 +6,8 @@ PROGS:=$(SRCS:.go=.prog)
 objs: $(PROGS)
 
 %.prog: %.go
+	gofmt -w *.go
+	goimports -w *.go
 	go build -i -o $@ $<
 
 clean:

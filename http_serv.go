@@ -1,4 +1,4 @@
-package main;
+package main
 
 import (
 	"net/http"
@@ -23,6 +23,6 @@ func handleTraffic(w http.ResponseWriter, r *http.Request) {
 	key := keys[0]
 	log.Println("key => %v", key)
 
-	reqStr,  _ := httputil.DumpRequest(r, true)
+	reqStr, _ := httputil.DumpRequest(r, true)
 	fmt.Println(string(reqStr))
 }

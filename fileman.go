@@ -1,12 +1,12 @@
 // Wojciech Adam Koszek
 package main
 
-import  (
-//	"encoding/json"
-//	"crypto/md5"
+import (
+	//	"encoding/json"
+	//	"crypto/md5"
+	"flag"
 	"fmt"
 	"os"
-	"flag"
 )
 
 const (
@@ -16,13 +16,13 @@ const (
 	g_linkedin = "wkoszek"
 )
 
-var cmdArgVerbose   = flag.Int("verbose", 0, "Turn the verbose logging");
-var cmdArgOutputDir = flag.String("outputdir", "./_", "Output directory");
+var cmdArgVerbose = flag.Int("verbose", 0, "Turn the verbose logging")
+var cmdArgOutputDir = flag.String("outputdir", "./_", "Output directory")
 
 func parseArgs() []string {
 	flag.Parse()
-//	cmdArg= flag.Int("flagname", 1234, "help message for flagname")
-//	flag.IntVar(&cmdArgVerbose, "verbose", defaultGopher, usage)
+	//	cmdArg= flag.Int("flagname", 1234, "help message for flagname")
+	//	flag.IntVar(&cmdArgVerbose, "verbose", defaultGopher, usage)
 	return flag.Args()
 }
 
@@ -49,13 +49,13 @@ func processFile(fileName string) (*BlogPost, error) {
 	var fileBytesRead = 0
 
 	fileBytesRead, err = file.Read(fileContent)
-	if (err != nil) {
+	if err != nil {
 		fmt.Println("nothing here")
 		return nil, nil
 	}
 	file.Close()
 
-	var strFileContent =  string(fileContent)
+	var strFileContent = string(fileContent)
 
 	fmt.Println("File size is ", fileSize, "read: ", fileBytesRead)
 	fmt.Println("File stuff is: %s", strFileContent)
@@ -72,7 +72,7 @@ func main() {
 	progName := os.Args[0]
 	fmt.Println(progName)
 
-        argsWithoutProg := os.Args[1:]
+	argsWithoutProg := os.Args[1:]
 
 	var allBlogPosts [](*BlogPost)
 	for _, arg := range argsWithoutProg {

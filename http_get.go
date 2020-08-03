@@ -1,10 +1,10 @@
-package main;
+package main
 
 import (
-	"net/http"
-	"net/http/httputil"
 	"fmt"
 	"log"
+	"net/http"
+	"net/http/httputil"
 )
 
 func main() {

@@ -1,0 +1,58 @@
+<html>
+<body>
+
+	{{ template "head.tmpl" }}
+
+	<table border>
+	<tbody>
+	{{ with .ItemsList }}
+			{{ range $index, $element := . }}
+				{{ if eq $index 0 }}
+					<tr>
+						<th>
+							#
+						</th>
+						<th>
+							title
+						</th>
+						<th>
+							author
+						</th>
+
+						{{ if gt (len .Nums) 0 }}
+							<th>
+								list
+							</th>
+						{{ end }}
+					</tr>
+				{{ end }}
+				<tr>
+					<td>
+						{{ $index }}
+					</td>
+					<td>
+						{{ $element.Title }}
+					</td>
+					<td>
+						{{ $element.Author }}
+					</td>
+
+					{{ if gt (len .Nums) 0 }}
+						<td>
+							{{ template "mosaic.tmpl" .Nums }}
+						</td>
+					{{ end }}
+				</tr>
+			{{ else }}
+				<tr>
+					<td colspan="3">
+						passed list is empty
+					</td>
+				</tr>
+			{{ end }}
+	{{ end }}
+	</tbody>
+	</table>
+
+</body>
+</html>

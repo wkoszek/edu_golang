@@ -1,0 +1,30 @@
+<html>
+<body>
+	<table border>
+	<tbody>
+
+	{{ block "page" . }}
+		header
+		
+		{{ template "content" }}
+
+		footer
+	{{ end }}
+
+
+	<hr />
+	{{ define "content" }}
+		first page
+	{{ end }}
+	{{ "page" }}
+	<hr />
+
+	{{ define "content" }}
+		first page
+	{{ end }}
+	{{ "page" }}
+
+	</tbody>
+	</table>
+</body>
+</html>

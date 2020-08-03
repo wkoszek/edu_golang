@@ -1,4 +1,4 @@
-package main;
+package main
 
 import (
 	"net/http"
@@ -8,11 +8,12 @@ import (
 	"log"
 
 	"database/sql"
+
 	_ "github.com/lib/pq"
 
-	"time"
-	"strings"
+	//"time"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -22,7 +23,8 @@ func main() {
 
 func handleTraffic(out http.ResponseWriter, in *http.Request) {
 	dbStr := "user=ubuntu dbname=ubuntu host=db sslmode=disable"
-	if (strings.Contains(hostStr, "wkoszek")) {
+	hostStr, _ := os.Hostname()
+	if strings.Contains(hostStr, "wkoszek") {
 		dbStr = "user=ubuntu dbname=ubuntu host=localhost sslmode=disable"
 	}
 
@@ -43,8 +45,8 @@ func handleTraffic(out http.ResponseWriter, in *http.Request) {
 		fmt.Println("error!")
 	} else {
 		var (
-			mime	string
-			js	string
+			mime string
+			js   string
 		)
 
 		for rows.Next() {
@@ -56,16 +58,6 @@ func handleTraffic(out http.ResponseWriter, in *http.Request) {
 		}
 	}
 
-
-
-	reqStr,  _ := httputil.DumpRequest(in, true)
+	reqStr, _ := httputil.DumpRequest(in, true)
 	fmt.Println(string(reqStr))
-}
-
-
-func main() {
-	time.Sleep(time.Second * 5)
-
-	hostStr, _ := os.Hostname()
-
 }

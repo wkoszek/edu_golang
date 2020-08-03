@@ -1,0 +1,13 @@
+<html>
+<body>
+
+
+{{ range . }}
+	<h2>{{ .Title }}</h2>
+	<h3>{{ .Author }}</h3>
+{{ else }}
+	passed list is empty
+{{ end }}
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+<html>
+<body>
+
+	{{ template "head.tmpl" }}
+
+	<table border>
+	<tbody>
+	{{ with .ItemsList }}
+			{{ range $index, $element := . }}
+				{{ if eq $index 0 }}
+					<tr>
+						<th>
+							#
+						</th>
+						<th>
+							title
+						</th>
+						<th>
+							author
+						</th>
+					</tr>
+				{{ else }}
+					<tr>
+						<td>
+							{{ $index }}
+						</td>
+						<td>
+							{{ $element.Title }}
+						</td>
+						<td>
+							{{ $element.Author }}
+						</td>
+					</tr>
+				{{ end }}
+			{{ else }}
+				<tr>
+					<td colspan="3">
+						passed list is empty
+					</td>
+				</tr>
+			{{ end }}
+	{{ end }}
+	</tbody>
+	</table>
+
+</body>
+</html>

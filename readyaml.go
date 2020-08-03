@@ -1,34 +1,35 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
-	"path/filepath"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Post struct {
-	Title	   string	`yaml:"title"`
-	Author	   string	`yaml:"author"`
-	Abstract   string	`yaml:"abstract"`
-	Address	   string	`yaml:"address"`
-	Auth	   string	`yaml:"auth"`
-	Read	   string	`yaml:"read"`
-	Layout	   string	`yaml:"layout"`
-	Tags	 []string	`yaml:"tags"`
-	Ads	 []string	`yaml:"ads"`
-	Body	 []string
+	Title    string   `yaml:"title"`
+	Author   string   `yaml:"author"`
+	Abstract string   `yaml:"abstract"`
+	Address  string   `yaml:"address"`
+	Auth     string   `yaml:"auth"`
+	Read     string   `yaml:"read"`
+	Layout   string   `yaml:"layout"`
+	Tags     []string `yaml:"tags"`
+	Ads      []string `yaml:"ads"`
+	Body     []string
 }
 
 const (
-	Posts_path = "/Users/wk/r/me/source/blog/*.md"
+	Posts_path       = "/Users/wk/r/me/source/blog/*.md"
 	Max_posts_number = 10000
 )
 
 var (
-	err		  error
-	posts_all	[]Post
+	err       error
+	posts_all []Post
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 	files, err = filepath.Glob(Posts_path)
 	failonerr(err)
 
-	for _, filename := range(files) {
+	for _, filename := range files {
 		p = processfile(filename)
 		posts_all = append(posts_all, p)
 	}
@@ -48,7 +49,7 @@ func main() {
 }
 
 func failonerr(err error) {
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 }
@@ -72,13 +73,12 @@ func processfile(filename string) Post {
 	return readyaml(filename, filebody)
 }
 
-func
-readyaml(filename string, body []byte) Post {
+func readyaml(filename string, body []byte) Post {
 	p := Post{}
 	err := yaml.Unmarshal(body, &p)
 	failonerr(err)
 
-	if (true) {
+	if true {
 		fmt.Println(filename)
 		fmt.Printf("--- t:\n%+v\n\n", p)
 	}
@@ -86,9 +86,9 @@ readyaml(filename string, body []byte) Post {
 }
 
 func renderAll(allPosts []Post) bool {
-//	tmpl, err := template.New("main").Parse("{{.Count}} items are made of {{.Material}}")
-//	if err != nil { panic(err) }
-//	err = tmpl.Execute(os.Stdout, sweaters)
-//	if err != nil { panic(err) }
+	//	tmpl, err := template.New("main").Parse("{{.Count}} items are made of {{.Material}}")
+	//	if err != nil { panic(err) }
+	//	err = tmpl.Execute(os.Stdout, sweaters)
+	//	if err != nil { panic(err) }
 	return true
 }

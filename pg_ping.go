@@ -1,19 +1,17 @@
-package main;
+package main
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
-	_ "github.com/lib/pq"
 	"time"
-	"strings"
-	"os"
+
+	_ "github.com/lib/pq"
+	//"strings"
 )
 
 func main() {
 	time.Sleep(time.Second * 5)
-
-	hostStr, _ := os.Hostname()
 
 	dbStr := "user=ubuntu dbname=ubuntu host=db sslmode=disable"
 
@@ -33,8 +31,8 @@ func main() {
 		fmt.Println("error!")
 	} else {
 		var (
-			mime	string
-			js	string
+			mime string
+			js   string
 		)
 
 		for rows.Next() {
